@@ -73,6 +73,16 @@
                         </ul>
                     </li>
                     <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">API Endpoints</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#api-overview" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Overview</a></li>
+                            <li><a href="#api-list" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">List Rules</a></li>
+                            <li><a href="#api-create" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Create Rule</a></li>
+                            <li><a href="#api-update" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Update Rule</a></li>
+                            <li><a href="#api-delete" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Delete Rule</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-8">
                         <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Usage Scenarios</h5>
                         <ul class="space-y-2 border-l border-slate-200">
                             <li><a href="#scenario-sensitive-data" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Sensitive User Data</a></li>
@@ -347,6 +357,95 @@ class UserResource extends JsonResource
                     <pre><code>Route::put('/users/{user}', [UserController::class, 'update'])
     ->middleware('fieldguard:App\Models\User');</code></pre>
                     <p class="text-slate-600">The middleware will automatically remove unauthorized fields from <code>$request->all()</code> before they reach your controller.</p>
+                </section>
+
+                <section id="api-endpoints" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">API Endpoints</h2>
+                    <p class="text-slate-600 mb-6">FieldGuard provides a set of RESTful API endpoints to manage security rules dynamically from your frontend or administrative dashboard.</p>
+
+                    <div id="api-overview" class="mb-10 p-6 bg-slate-100 rounded-xl border border-slate-200 scroll-mt-20">
+                        <h3 class="text-xl font-bold text-slate-800 mb-3">Overview</h3>
+                        <p class="text-sm text-slate-600 mb-4">By default, all API routes are prefixed with <code>/field-guard</code> and protected by <code>auth:sanctum</code>.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-xs font-bold uppercase text-slate-500">Default Prefix</span>
+                                <code class="block mt-1 p-2 bg-white rounded border text-blue-600">/field-guard/rules</code>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold uppercase text-slate-500">Middleware</span>
+                                <code class="block mt-1 p-2 bg-white rounded border text-blue-600">['api', 'auth:sanctum']</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-12">
+                        <!-- List -->
+                        <div id="api-list" class="scroll-mt-20">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold">GET</span>
+                                <h3 class="text-xl font-bold text-slate-800">List Rules</h3>
+                            </div>
+                            <pre><code>GET /field-guard/rules</code></pre>
+                            <p class="text-slate-600 mb-4">Retrieve a paginated list of all security rules.</p>
+                            <h4 class="text-sm font-bold text-slate-700 mb-2">Response Example:</h4>
+                            <pre class="text-sm"><code>{
+    "data": [
+        {
+            "id": 1,
+            "model_class": "App\\Models\\User",
+            "field_name": "salary",
+            "read_policy": { "roles": ["hr"] },
+            "write_policy": { "roles": ["admin"] },
+            "mask": "CONFIDENTIAL",
+            "is_active": true
+        }
+    ]
+}</code></pre>
+                        </div>
+
+                        <!-- Create -->
+                        <div id="api-create" class="scroll-mt-20">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold">POST</span>
+                                <h3 class="text-xl font-bold text-slate-800">Create Rule</h3>
+                            </div>
+                            <pre><code>POST /field-guard/rules</code></pre>
+                            <h4 class="text-sm font-bold text-slate-700 mb-2">Request Body:</h4>
+                            <pre class="text-sm"><code>{
+    "model_class": "App\\Models\\Product",
+    "field_name": "cost_price",
+    "read_policy": ["admin"],
+    "write_policy": ["super-admin"],
+    "mask": null,
+    "is_active": true
+}</code></pre>
+                        </div>
+
+                        <!-- Update -->
+                        <div id="api-update" class="scroll-mt-20">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="bg-amber-500 text-white px-3 py-1 rounded text-xs font-bold">PUT / PATCH</span>
+                                <h3 class="text-xl font-bold text-slate-800">Update Rule</h3>
+                            </div>
+                            <pre><code>PUT /field-guard/rules/{id}</code></pre>
+                            <p class="text-slate-600 mb-4">Update an existing rule by its ID.</p>
+                            <h4 class="text-sm font-bold text-slate-700 mb-2">Request Body (Partial update supported via PATCH):</h4>
+                            <pre class="text-sm"><code>{
+    "is_active": false,
+    "mask": "HIDDEN"
+}</code></pre>
+                        </div>
+
+                        <!-- Delete -->
+                        <div id="api-delete" class="scroll-mt-20">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">DELETE</span>
+                                <h3 class="text-xl font-bold text-slate-800">Delete Rule</h3>
+                            </div>
+                            <pre><code>DELETE /field-guard/rules/{id}</code></pre>
+                            <p class="text-slate-600">Permanently remove a rule from the database.</p>
+                        </div>
+                    </div>
                 </section>
 
                 <hr class="my-12 border-slate-200">
