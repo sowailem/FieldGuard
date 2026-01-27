@@ -3,9 +3,10 @@
 namespace Sowailem\FieldGuard\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
+use Illuminate\Validation\ValidationException;
 use Sowailem\FieldGuard\Models\FieldGuardRule;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class FieldGuardRuleRepository
@@ -37,17 +38,17 @@ class FieldGuardRuleRepository
         $fieldName = $data['field_name'] ?? null;
 
         if (!$modelClass || !class_exists($modelClass)) {
-            throw new InvalidArgumentException("Model class '{$modelClass}' does not exist.");
+            $this->throwValidationException('model_class', "Model class '{$modelClass}' does not exist.");
         }
 
         try {
             $model = new $modelClass;
         } catch (Throwable $e) {
-            throw new InvalidArgumentException("Model class '{$modelClass}' could not be instantiated: " . $e->getMessage());
+            $this->throwValidationException('model_class', "Model class '{$modelClass}' could not be instantiated: " . $e->getMessage());
         }
 
         if (!($model instanceof Model)) {
-            throw new InvalidArgumentException("Class '{$modelClass}' is not an Eloquent model.");
+            $this->throwValidationException('model_class', "Class '{$modelClass}' is not an Eloquent model.");
         }
 
         // Check if a field exists in fillable, guarded, or as a database column if we can
@@ -74,8 +75,15 @@ class FieldGuardRuleRepository
         }
 
         if (!in_array($fieldName, $fillable) && !in_array($fieldName, $guarded) && $fieldName !== $model->getKeyName()) {
-            throw new InvalidArgumentException("Field '{$fieldName}' does not exist on model '{$modelClass}'.");
+            $this->throwValidationException('field_name', "Field '{$fieldName}' does not exist on model '{$modelClass}'.");
         }
+    }
+
+    protected function throwValidationException(string $key, string $message)
+    {
+        throw ValidationException::withMessages([
+            $key => [$message],
+        ]);
     }
 
     public function update(FieldGuardRule $rule, array $data)
