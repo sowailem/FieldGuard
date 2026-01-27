@@ -3,27 +3,27 @@
 namespace Sowailem\FieldGuard\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Sowailem\FieldGuard\Models\FieldGuardRule;
+use Sowailem\FieldGuard\Repositories\FieldGuardRuleRepository;
 
 class FieldGuardRuleSeeder extends Seeder
 {
-    public function run()
+    public function run(FieldGuardRuleRepository $repository)
     {
-        // Example: Secure salary for User model
-        FieldGuardRule::create([
+        // Example: Secure email for a User model
+        $repository->create([
             'model_class' => 'App\Models\User',
-            'field_name' => 'salary',
+            'field_name' => 'email',
             'read_policy' => ['roles' => ['admin', 'hr'], 'allow_self' => true],
             'write_policy' => ['roles' => ['admin']],
             'is_active' => true,
         ]);
 
-        // Example: Mask SSN for User model
-        FieldGuardRule::create([
+        // Example: Mask password for a User model
+        $repository->create([
             'model_class' => 'App\Models\User',
-            'field_name' => 'ssn',
+            'field_name' => 'password',
             'read_policy' => 'false',
-            'mask' => '***-***-***',
+            'mask' => '*********',
             'is_active' => true,
         ]);
     }
