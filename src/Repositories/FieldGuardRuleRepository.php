@@ -2,8 +2,11 @@
 
 namespace Sowailem\FieldGuard\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 use Sowailem\FieldGuard\Models\FieldGuardRule;
 use Illuminate\Support\Facades\Cache;
+use Throwable;
 
 class FieldGuardRuleRepository
 {
@@ -34,15 +37,20 @@ class FieldGuardRuleRepository
         $fieldName = $data['field_name'] ?? null;
 
         if (!$modelClass || !class_exists($modelClass)) {
-            throw new \InvalidArgumentException("Model class '{$modelClass}' does not exist.");
+            throw new InvalidArgumentException("Model class '{$modelClass}' does not exist.");
         }
 
-        $model = new $modelClass;
-        if (!($model instanceof \Illuminate\Database\Eloquent\Model)) {
-            throw new \InvalidArgumentException("Class '{$modelClass}' is not an Eloquent model.");
+        try {
+            $model = new $modelClass;
+        } catch (Throwable $e) {
+            throw new InvalidArgumentException("Model class '{$modelClass}' could not be instantiated: " . $e->getMessage());
         }
 
-        // Check if field exists in fillable, guarded, or as a database column if we can
+        if (!($model instanceof Model)) {
+            throw new InvalidArgumentException("Class '{$modelClass}' is not an Eloquent model.");
+        }
+
+        // Check if a field exists in fillable, guarded, or as a database column if we can
         // For now, checking if it is in fillable or guarded might be enough or if we can get schema
         $fillable = $model->getFillable();
         $guarded = $model->getGuarded();
@@ -58,16 +66,15 @@ class FieldGuardRuleRepository
         try {
             $table = $model->getTable();
             $schema = $model->getConnection()->getSchemaBuilder();
-            if (!$schema->hasColumn($table, $fieldName)) {
-                // If not a column, maybe it's a dynamic property? 
-                // But the requirement says "field of it is excist".
-                throw new \InvalidArgumentException("Field '{$fieldName}' does not exist on model '{$modelClass}'.");
+            if ($schema->hasColumn($table, $fieldName)) {
+                return;
             }
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // Fallback if DB connection fails or other issues
-            if (!in_array($fieldName, $fillable) && !in_array($fieldName, $guarded) && $fieldName !== $model->getKeyName()) {
-                 throw new \InvalidArgumentException("Field '{$fieldName}' does not exist on model '{$modelClass}'.");
-            }
+        }
+
+        if (!in_array($fieldName, $fillable) && !in_array($fieldName, $guarded) && $fieldName !== $model->getKeyName()) {
+            throw new InvalidArgumentException("Field '{$fieldName}' does not exist on model '{$modelClass}'.");
         }
     }
 
