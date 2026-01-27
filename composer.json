@@ -1,0 +1,45 @@
+{
+  "name": "sowailem/fieldguard",
+  "description": "FieldGuard is a Laravel package that enforces field-level security on Eloquent models, allowing fine-grained control over who can view or modify specific attributes—perfect for role-based data protection without altering your core models.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Abdullah Sowailem",
+      "email": "abdullah.sowailem@email.com"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
+    "illuminate/contracts": "^12.0",
+    "illuminate/support": "^12.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "phpstan/phpstan": "^2.0",
+    "squizlabs/php_codesniffer": "^3.10",
+    "orchestra/testbench": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sowailem\\FieldGuard\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sowailem\\FieldGuard\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Sowailem\\FieldGuard\\FieldGuardServiceProvider"
+      ],
+      "aliases": {
+        "FieldGuard": "Sowailem\\FieldGuard\\Facades\\FieldGuard"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

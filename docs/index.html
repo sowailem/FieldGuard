@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FieldGuard Documentation - Dynamic Field-Level Security for Laravel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        pre {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .sidebar-link-active {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-[60]">
+        <div class="flex items-center gap-2">
+            <img src="../images/FieldGuard.png" alt="FieldGuard" class="h-8">
+            <span class="font-bold text-xl tracking-tight text-slate-800">FieldGuard</span>
+        </div>
+        <button id="mobile-menu-toggle" class="p-2 text-slate-600">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </header>
+
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 md:px-8 lg:flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:block z-20 w-[19rem] pb-10 pl-8 pr-6 bg-slate-50">
+            <nav id="nav" class="lg:text-sm lg:leading-6 relative">
+                <div class="h-10"></div>
+                <div class="flex items-center gap-3 mb-8">
+                    <img src="../images/FieldGuard.png" alt="FieldGuard" class="h-10">
+                    <span class="font-bold text-2xl tracking-tight text-slate-800">FieldGuard</span>
+                </div>
+                <ul>
+                    <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Getting Started</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#introduction" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Introduction</a></li>
+                            <li><a href="#installation" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Installation</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Core Concepts</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#fieldguard-class" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">The FieldGuard Class</a></li>
+                            <li><a href="#rules" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Security Rules</a></li>
+                            <li><a href="#policy-types" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Policy Types</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Enforcement</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#manual-read" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Manual Enforcement (Read)</a></li>
+                            <li><a href="#api-resources" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">API Resource Integration</a></li>
+                            <li><a href="#automatic-global" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Automatic Global Enforcement</a></li>
+                            <li><a href="#automatic-write" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Automatic Middleware Enforcement (Write)</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Usage Scenarios</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#scenario-sensitive-data" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Sensitive User Data</a></li>
+                            <li><a href="#scenario-pricing" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Dynamic Pricing</a></li>
+                            <li><a href="#scenario-finance" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Financial Transactions</a></li>
+                        </ul>
+                    </li>
+                    <li class="mt-8">
+                        <h5 class="mb-3 lg:mb-3 font-semibold text-slate-900">Advanced</h5>
+                        <ul class="space-y-2 border-l border-slate-200">
+                            <li><a href="#caching" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Caching & Performance</a></li>
+                            <li><a href="#custom-resolvers" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Custom Policy Resolvers</a></li>
+                            <li><a href="#seeding" class="block border-l pl-4 -ml-px border-transparent hover:border-slate-400 text-slate-700 hover:text-slate-900">Seeding Rules</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-auto pt-10 pb-24">
+            <div class="mx-auto">
+                <div class="flex-auto">
+                
+                <section id="introduction" class="mb-16 scroll-mt-20">
+                    <img src="../images/FieldGuard.png" alt="FieldGuard Banner" class="w-full rounded-xl shadow-lg mb-10">
+                    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Introduction</h1>
+                    <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                        FieldGuard is a lightweight, non-intrusive Laravel package for field-level security on Eloquent models. It allows you to control which users can view or modify specific attributes using dynamic, database-driven rules.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <i class="fas fa-database text-blue-500 text-2xl mb-4"></i>
+                            <h3 class="font-bold text-slate-800 mb-2">Database-Driven</h3>
+                            <p class="text-slate-600 text-sm">Manage all security rules via database for runtime configuration without code changes.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <i class="fas fa-user-shield text-green-500 text-2xl mb-4"></i>
+                            <h3 class="font-bold text-slate-800 mb-2">Non-Intrusive</h3>
+                            <p class="text-slate-600 text-sm">No traits, base classes, or attributes required. Keep your models clean.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <i class="fas fa-eye-slash text-purple-500 text-2xl mb-4"></i>
+                            <h3 class="font-bold text-slate-800 mb-2">Granular Control</h3>
+                            <p class="text-slate-600 text-sm">Separate rules for viewing (Read) and updating (Write) specific attributes.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <i class="fas fa-bolt text-amber-500 text-2xl mb-4"></i>
+                            <h3 class="font-bold text-slate-800 mb-2">Performance First</h3>
+                            <p class="text-slate-600 text-sm">Optimized with Laravel's cache system to ensure zero overhead on hot paths.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="my-12 border-slate-200">
+
+                <section id="installation" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Installation</h2>
+                    <p class="text-slate-600 mb-6">Install the package via composer:</p>
+                    <pre><code>composer require sowailem/fieldguard</code></pre>
+                    <p class="text-slate-600 mb-6 mt-8">Run the migrations to create the required <code>field_guard_rules</code> table:</p>
+                    <pre><code>php artisan migrate</code></pre>
+                </section>
+
+                <section id="fieldguard-class" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">The FieldGuard Class</h2>
+                    <p class="text-slate-600 mb-6">
+                        The <code>Sowailem\FieldGuard\FieldGuard</code> class is the heart of the package. It handles rule resolution, permission checking, and attribute filtering.
+                    </p>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-3">Core Responsibilities</h3>
+                            <ul class="list-disc pl-6 text-slate-600 space-y-2">
+                                <li><strong>Rule Loading:</strong> Fetches rules for a specific model class from the database (via <code>FieldGuardRuleRepository</code>) and handles caching.</li>
+                                <li><strong>Policy Resolution:</strong> Interprets different policy types (Gates, roles, self-access, or complex JSON arrays).</li>
+                                <li><strong>Attribute Masking/Hiding:</strong> Modifies model attributes for "Read" operations based on permissions.</li>
+                                <li><strong>Dirty State Protection:</strong> Reverts unauthorized changes for "Write" operations by checking <code>isDirty()</code> before saving.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-3">Key Methods</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200 bg-white border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Method</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Purpose</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">applyReadSecurity()</td>
+                                            <td class="px-6 py-4 text-sm text-slate-600">Iterates through rules and applies masks or hides fields on the model instance.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">applyWriteSecurity()</td>
+                                            <td class="px-6 py-4 text-sm text-slate-600">Checks if protected fields were modified and reverts them to original values if unauthorized.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">checkPermission()</td>
+                                            <td class="px-6 py-4 text-sm text-slate-600">The engine that decides if a user has access based on the defined policy string or array.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="rules" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Security Rules</h2>
+                    <p class="text-slate-600 mb-6">
+                        FieldGuard relies on rules created in the database. You can manage these rules using the <code>FieldGuardRule</code> model.
+                    </p>
+                    <pre><code>use Sowailem\FieldGuard\Models\FieldGuardRule;
+
+FieldGuardRule::create([
+    'model_class' => 'App\Models\User',
+    'field_name' => 'salary',
+    'read_policy' => ['roles' => ['admin', 'hr'], 'allow_self' => true],
+    'write_policy' => ['roles' => ['admin']],
+    'mask' => 'PROTECTED',
+    'is_active' => true,
+]);</code></pre>
+
+                    <div class="mt-10">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">Rule Structure</h3>
+                        <div class="overflow-hidden border border-slate-200 rounded-lg">
+                            <table class="min-w-full divide-y divide-slate-200 bg-white">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Field</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">model_class</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">Fully qualified class name of the Eloquent model (e.g., <code>App\Models\User</code>).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">field_name</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">The name of the attribute to secure.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">read_policy</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">Permission for viewing the field. Can be a string or JSON object.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">write_policy</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">Permission for creating or updating the field.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">mask</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">Value to return if <code>read</code> permission is denied (e.g., <code>***-***-***</code>). If null, the field is removed from the array.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">is_active</td>
+                                        <td class="px-6 py-4 text-sm text-slate-600">Boolean to enable/disable the rule.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="policy-types" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Policy Types</h2>
+                    <p class="text-slate-600 mb-6">Policies can be defined in multiple formats to suit your needs:</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <strong class="text-slate-800">Gate Name:</strong>
+                                <span class="text-slate-600">Use any Laravel Gate name (e.g., <code>'view-salary'</code>).</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <strong class="text-slate-800">'self':</strong>
+                                <span class="text-slate-600">Allows access if the user's ID matches the model's primary key.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <strong class="text-slate-800">'role:name':</strong>
+                                <span class="text-slate-600">Requires a specific role (expects a <code>hasRole($role)</code> method on the User model).</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <strong class="text-slate-800">'true' / 'false':</strong>
+                                <span class="text-slate-600">Strings that always allow or always deny access.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <strong class="text-slate-800">JSON Array:</strong>
+                                <span class="text-slate-600">For complex logic (e.g., <code>{"roles": ["admin"], "allow_self": true, "gate": "extra-check"}</code>).</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="manual-read" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Manual Enforcement (Read)</h2>
+                    <p class="text-slate-600 mb-6">Use the <code>FieldGuard</code> facade to manually filter model attributes. This is perfect for controllers.</p>
+                    <pre><code>use Sowailem\FieldGuard\Facades\FieldGuard;
+
+public function view(User $user)
+{
+    // Returns filtered attributes array
+    return FieldGuard::apply($user, auth()->user());
+}</code></pre>
+                </section>
+
+                <section id="api-resources" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">API Resource Integration</h2>
+                    <p class="text-slate-600 mb-6">The best way to use FieldGuard is within your API resources.</p>
+                    <pre><code>namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+use Sowailem\FieldGuard\Facades\FieldGuard;
+
+class UserResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        return FieldGuard::apply($this->resource, $request->user());
+    }
+}</code></pre>
+                </section>
+
+                <section id="automatic-global" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Automatic Global Enforcement</h2>
+                    <p class="text-slate-600 mb-6">FieldGuard can automatically enforce security rules across all models using Eloquent events. This eliminates the need for manual facade calls or traits.</p>
+                    
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Configuration</h3>
+                    <p class="text-slate-600 mb-4">Enable it in <code>config/fieldguard.php</code>:</p>
+                    <pre><code>'automatic_enforcement' => true,</code></pre>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                        <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-2">Automatic Read</h4>
+                            <p class="text-slate-600 text-sm">Listens to <code>retrieved</code> event. Automatically hides or masks unauthorized fields whenever a model is loaded.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-2">Automatic Write</h4>
+                            <p class="text-slate-600 text-sm">Listens to <code>saving</code> event. Automatically reverts unauthorized changes to protected fields before they hit the database.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="automatic-write" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Automatic Middleware Enforcement (Write)</h2>
+                    <p class="text-slate-600 mb-6">Register the middleware to automatically filter incoming request data before it reaches your controller logic.</p>
+                    
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Laravel 11+ (bootstrap/app.php)</h3>
+                    <pre><code>->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'fieldguard' => \Sowailem\FieldGuard\Middleware\EnforceFieldSecurityMiddleware::class,
+    ]);
+})</code></pre>
+
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 mt-8">Apply to Routes</h3>
+                    <pre><code>Route::put('/users/{user}', [UserController::class, 'update'])
+    ->middleware('fieldguard:App\Models\User');</code></pre>
+                    <p class="text-slate-600">The middleware will automatically remove unauthorized fields from <code>$request->all()</code> before they reach your controller.</p>
+                </section>
+
+                <hr class="my-12 border-slate-200">
+
+                <section id="usage-scenarios" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-8">Detailed Usage Scenarios</h2>
+
+                    <!-- Scenario 1 -->
+                    <div id="scenario-sensitive-data" class="mb-12 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm scroll-mt-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase">HR System</span>
+                            <h3 class="text-2xl font-bold text-slate-800">Sensitive User Data</h3>
+                        </div>
+                        <p class="text-slate-600 mb-6">In a company portal, everyone can see basic user info, but only HR and the user themselves should see the salary. Only the Super Admin can change the salary.</p>
+                        
+                        <div class="bg-slate-900 rounded-lg p-5 mb-6">
+                            <p class="text-slate-400 text-sm mb-3">// Database Rule for App\Models\User -> 'salary'</p>
+                            <pre class="m-0 p-0 bg-transparent text-sm"><code>FieldGuardRule::create([
+    'model_class' => 'App\Models\User',
+    'field_name' => 'salary',
+    'read_policy' => ['roles' => ['hr'], 'allow_self' => true],
+    'write_policy' => ['roles' => ['super-admin']],
+    'mask' => 'CONFIDENTIAL'
+]);</code></pre>
+                        </div>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex gap-2"><i class="fas fa-check-circle text-green-500 mt-1"></i> <strong>Employee views own profile:</strong> Sees salary.</li>
+                            <li class="flex gap-2"><i class="fas fa-check-circle text-green-500 mt-1"></i> <strong>HR views employee profile:</strong> Sees salary.</li>
+                            <li class="flex gap-2"><i class="fas fa-check-circle text-green-500 mt-1"></i> <strong>Colleague views profile:</strong> Sees "CONFIDENTIAL".</li>
+                            <li class="flex gap-2"><i class="fas fa-times-circle text-red-500 mt-1"></i> <strong>HR tries to update salary:</strong> Change is ignored/reverted.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Scenario 2 -->
+                    <div id="scenario-pricing" class="mb-12 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm scroll-mt-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold uppercase">E-Commerce</span>
+                            <h3 class="text-2xl font-bold text-slate-800">Dynamic Product Pricing</h3>
+                        </div>
+                        <p class="text-slate-600 mb-6">Show "Wholesale" prices only to verified B2B customers. Standard customers shouldn't even know the field exists.</p>
+                        
+                        <div class="bg-slate-900 rounded-lg p-5 mb-6">
+                            <p class="text-slate-400 text-sm mb-3">// Database Rule for App\Models\Product -> 'wholesale_price'</p>
+                            <pre class="m-0 p-0 bg-transparent text-sm"><code>FieldGuardRule::create([
+    'model_class' => 'App\Models\Product',
+    'field_name' => 'wholesale_price',
+    'read_policy' => 'role:b2b-customer',
+    'mask' => null // Field will be removed from array
+]);</code></pre>
+                        </div>
+                        <p class="text-slate-600 text-sm italic">Result: <code>ProductResource</code> will automatically exclude 'wholesale_price' for normal users, preventing leakage of sensitive pricing structures.</p>
+                    </div>
+
+                    <!-- Scenario 3 -->
+                    <div id="scenario-finance" class="mb-12 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm scroll-mt-20">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase">FinTech</span>
+                            <h3 class="text-2xl font-bold text-slate-800">Financial Transactions</h3>
+                        </div>
+                        <p class="text-slate-600 mb-6">Protect transaction "status" from being tampered with. Only the system-level 'processor' gate should be able to change it.</p>
+                        
+                        <div class="bg-slate-900 rounded-lg p-5 mb-6">
+                            <p class="text-slate-400 text-sm mb-3">// Database Rule for App\Models\Transaction -> 'status'</p>
+                            <pre class="m-0 p-0 bg-transparent text-sm"><code>FieldGuardRule::create([
+    'model_class' => 'App\Models\Transaction',
+    'field_name' => 'status',
+    'write_policy' => ['gate' => 'update-transaction-status'],
+]);</code></pre>
+                        </div>
+                        <p class="text-slate-600 text-sm">Even if a user sends <code>{"status": "completed"}</code> in a <code>PUT</code> request, the <code>fieldguard</code> middleware will strip it out if the <code>update-transaction-status</code> gate fails, ensuring the integrity of your business workflow.</p>
+                    </div>
+                </section>
+
+                <section id="caching" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Caching & Performance</h2>
+                    <p class="text-slate-600 mb-6">
+                        Database rules are cached forever to ensure maximum performance. The cache is automatically cleared when you use the <code>FieldGuardRuleRepository</code> to manage rules.
+                    </p>
+                    <p class="text-slate-600 mb-4">You can manually clear the cache via Artisan:</p>
+                    <pre><code>php artisan fieldguard:clear-cache</code></pre>
+                    <p class="text-slate-600 mt-4">The cache tag can be configured in <code>config/fieldguard.php</code>.</p>
+                </section>
+
+                <section id="custom-resolvers" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Custom Policy Resolvers</h2>
+                    <p class="text-slate-600 mb-6">Implement <code>PolicyResolver</code> for custom logic (e.g., integrating with Spatie Permissions).</p>
+                    <pre><code>namespace App\Security;
+
+use Sowailem\FieldGuard\Contracts\PolicyResolver;
+use Illuminate\Database\Eloquent\Model;
+
+class MyCustomResolver implements PolicyResolver
+{
+    public function resolve(array $policy, Model $model, $user): bool
+    {
+        // Your custom logic for array policies
+        return true; 
+    }
+}</code></pre>
+                    <p class="text-slate-600 mb-4">Register in <code>config/fieldguard.php</code>:</p>
+                    <pre><code>'resolver' => \App\Security\MyCustomResolver::class,</code></pre>
+                </section>
+
+                <section id="seeding" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Seeding Rules</h2>
+                    <p class="text-slate-600 mb-6">Bootstrap your security rules using the provided seeder:</p>
+                    <pre><code>php artisan db:seed --class="Sowailem\FieldGuard\Database\Seeders\FieldGuardRuleSeeder"</code></pre>
+                </section>
+
+                <footer class="mt-20 pt-10 border-t border-slate-200 text-slate-500 text-sm flex justify-between items-center">
+                    <p>© 2026 Abdullah Sowailem. Released under the MIT License.</p>
+                    <div class="flex gap-6">
+                        <a href="https://github.com/sowailem/fieldguard" class="hover:text-slate-900 transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </main>
+</div>
+
+    <script>
+        // Mobile menu toggle
+        const toggle = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('fixed');
+            sidebar.classList.toggle('bg-white');
+            sidebar.classList.toggle('inset-0');
+            sidebar.classList.toggle('z-50');
+            sidebar.classList.toggle('top-14');
+        });
+
+        // Simple scroll spy (visual only for this demo)
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('#nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('border-slate-900', 'text-slate-900', 'font-semibold');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('border-slate-900', 'text-slate-900', 'font-semibold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
