@@ -4,6 +4,8 @@
 
 FieldGuard is a lightweight, non-intrusive Laravel package for field-level security on Eloquent models. It allows you to control which users can view or modify specific attributes using dynamic, database-driven rules.
 
+[![YouTube Video](https://raw.githubusercontent.com/sowailem/FieldGuard/refs/heads/main/images/fieldguard-hero.png)](https://www.youtube.com/watch?v=vbixycjWKHo)
+
 ## Features
 
 - **Database-Driven Rules**: Create and manage security rules in the database for runtime configuration.
